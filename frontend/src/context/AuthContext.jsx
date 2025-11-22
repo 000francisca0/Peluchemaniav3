@@ -3,32 +3,22 @@ import { Navigate, useLocation } from 'react-router-dom';
 
 const AuthContext = createContext(null);
 
-export const useAuth = () => {
-  return useContext(AuthContext);
-};
+export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  // 1. INICIALIZACIÓN: Intentamos recuperar al usuario guardado si recargas la página
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('user_data');
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
-  // 2. LOGIN: Recibe los datos del Backend y los guarda
   const login = (userData, token) => {
-    // Guardamos el token para las peticiones
     localStorage.setItem('token', token);
-
-    // PREPARAR OBJETO DE USUARIO
-    // El backend envía campos sueltos (direccionCalle, direccionRegion...)
-    // Nosotros los agrupamos en 'direccionDefault' para que el Checkout los lea fácil.
+    
     const userToSave = {
       id: userData.id,
       nombre: userData.nombre,
       email: userData.email,
-      rol: userData.rol, // "ADMIN", "CLIENTE", etc.
-      
-      // Creamos el objeto de dirección agrupado
+      rol: userData.rol,
       direccionDefault: {
         region: userData.direccionRegion || '',
         comuna: userData.direccionComuna || '',
@@ -37,12 +27,10 @@ export const AuthProvider = ({ children }) => {
       }
     };
 
-    // Guardamos en el navegador y en el estado
     localStorage.setItem('user_data', JSON.stringify(userToSave));
     setUser(userToSave);
   };
 
-  // 3. LOGOUT: Limpia todo
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user_data');
@@ -56,34 +44,24 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// --- COMPONENTES DE PROTECCIÓN DE RUTAS ---
+// --- PROTECCIÓN DE RUTAS ---
 
-// 1. Para rutas que requieren estar logueado (ej: Carrito, Checkout)
 export const RequireAuth = ({ children }) => {
   const auth = useAuth();
   const location = useLocation();
-
-  if (!auth.user) {
-    // Si no está logueado, lo mandamos al login y recordamos de dónde venía
-    return <Navigate to="/inicio" state={{ from: location }} replace />;
-  }
-
+  if (!auth.user) return <Navigate to="/inicio" state={{ from: location }} replace />;
   return children;
 };
 
-// 2. Para rutas de ADMINISTRADOR (y Vendedor)
+// CORREGIDO: Acepta ADMIN y VENDEDOR
 export const RequireAdmin = ({ children }) => {
   const auth = useAuth();
   const location = useLocation();
 
-  // Permitimos acceso si es ADMIN o VENDEDOR
-  const esPersonalAutorizado = 
-    auth.user?.rol === 'ADMIN' || 
-    auth.user?.rol === 'ROLE_ADMIN' ||
-    auth.user?.rol === 'VENDEDOR' || 
-    auth.user?.rol === 'ROLE_VENDEDOR';
+  // Lista de roles permitidos en el panel
+  const rolesPermitidos = ['ADMIN', 'ROLE_ADMIN', 'VENDEDOR', 'ROLE_VENDEDOR'];
 
-  if (!auth.user || !esPersonalAutorizado) {
+  if (!auth.user || !rolesPermitidos.includes(auth.user.rol)) {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
 
