@@ -1,0 +1,265 @@
+/* ===================================
+   GLOBAL VARIABLES + BASE RESET
+   =================================== */
+:root{
+  --brand: #FFA07A;
+  --brand-hover: #F08060;
+  --accent: #007bff;
+  --muted: #6c757d;
+  --text: #213547;
+  --card-bg: #fff;
+  --shadow-soft: rgba(0,0,0,0.08);
+  --shadow-strong: rgba(0,0,0,0.12);
+  --bg-footer: #fffafa;
+  --max-width: 1200px;
+  --header-h: 80px; /* Ajustado a 80px según tu Header nuevo */
+  --radius-lg: 12px;
+  --radius-md: 8px;
+  --radius-sm: 6px;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Open Sans", "Helvetica Neue", sans-serif;
+  color-scheme: light;
+}
+
+/* Reset small defaults */
+*{box-sizing: border-box}
+html,body,#root{height:100%}
+
+body{
+  margin:0;
+  color:var(--text);
+  line-height:1.45;
+  
+  /* Fondo con la imagen del oso */
+  background: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url('/oso5.jpg') center/cover no-repeat fixed;
+  
+  background-color: #fff; 
+  min-height: 100vh;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+/* Layout helpers */
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 2rem;
+  width: 100%;
+}
+
+.main-content {
+  padding-top: 2rem; /* Espacio extra bajo el header */
+  min-height: calc(100vh - var(--header-h) - 100px); /* Mínimo para empujar footer */
+}
+
+/* Centered card commonly used in Login / Register */
+.center-card {
+  background: var(--card-bg);
+  border-radius: 20px;
+  padding: 2.5rem;
+  box-shadow: 0 10px 25px var(--shadow-soft);
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* Generic grid for products / posts / dashboard */
+.grid {
+  display: grid;
+  gap: 1.5rem;
+  /* Esto asegura que si la pantalla es chica, pase a 1 columna automáticamente */
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+/* ===================================
+   CARD (Componente reutilizable)
+   =================================== */
+.card {
+  background: var(--card-bg);
+  border-radius: 15px;
+  overflow: hidden; /* Importante para que la imagen no se salga de las esquinas */
+  display: flex;
+  flex-direction: column;
+  transition: transform .25s ease, box-shadow .25s ease;
+  box-shadow: 0 4px 15px var(--shadow-soft);
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid rgba(0,0,0,0.02);
+}
+
+.card.hover-effect:hover { 
+  transform: translateY(-5px); 
+  box-shadow: 0 12px 20px var(--shadow-strong); 
+}
+
+.card-media {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+}
+
+.card-body {
+  padding: 1.25rem;
+  flex-grow: 1;
+}
+
+.card-title { 
+  font-size: 1.2rem; 
+  font-weight: 700; 
+  margin: 0 0 .5rem; 
+  color: #343a40; 
+}
+
+.card-sub { 
+  color: var(--muted); 
+  margin-bottom: .75rem; 
+  font-size: .95rem; 
+}
+
+/* Acciones al pie de la tarjeta */
+.card-actions {
+  padding: 0.75rem 1.25rem 1.25rem;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #f0f0f0;
+  margin-top: auto;
+}
+
+/* ===================================
+   BUTTONS & INPUTS
+   =================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  padding: .65rem 1rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  transition: all 0.2s;
+  font-size: 0.95rem;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 2px solid var(--brand);
+  color: var(--brand);
+}
+.btn-ghost:hover { background: var(--brand); color: #fff; }
+
+.btn-primary {
+  background: var(--brand);
+  color: #fff;
+  border: 2px solid var(--brand); /* Para mantener el mismo tamaño que ghost */
+}
+.btn-primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); transform: translateY(-1px); }
+
+.btn-block { width: 100%; }
+
+/* Formularios */
+.form-shell {
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 2.5rem;
+  max-width: 450px;
+  width: 100%;
+  margin: 0 auto;
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+}
+
+.form-control {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  outline: none;
+  font-size: 1rem;
+  width: 100%;
+  transition: border-color 0.2s;
+}
+.form-control:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(255, 160, 122, 0.2); }
+
+.form-group { margin-bottom: 1rem; }
+.form-label { font-weight: 600; margin-bottom: 0.4rem; display: block; color: var(--text); }
+
+/* ===================================
+   HEADER & NAV
+   =================================== */
+/* El header usa estilos inline en el componente, 
+   pero definimos aquí la visibilidad para móvil */
+
+.mobile-toggle {
+  display: none; /* Oculto en PC */
+}
+
+/* ===================================
+   RESPONSIVE (MOBILE FIRST TWEAKS)
+   =================================== */
+
+@media (max-width: 768px) {
+  
+  /* 1. Ajustar contenedores */
+  .container {
+    padding: 1rem; /* Menos margen en celular */
+  }
+
+  /* 2. Ocultar menú de escritorio y mostrar hamburguesa */
+  .hidden-sm { display: none !important; }
+  .mobile-toggle { display: block !important; }
+
+  /* 3. Ajustar textos grandes */
+  h1 { font-size: 1.8rem; }
+  h2 { font-size: 1.5rem; }
+
+  /* 4. Tablas con Scroll Horizontal (CLAVE PARA ADMIN) */
+  /* Esto evita que la tabla rompa el diseño en celular */
+  .card-body {
+    overflow-x: auto; 
+  }
+  table {
+    min-width: 600px; /* Fuerza a la tabla a mantener su ancho y activar el scroll */
+  }
+
+  /* 5. Ajustes de Grillas específicas */
+  .home-hero-grid, .home-blog-grid {
+    grid-template-columns: 1fr !important; /* Pone imagen y texto uno debajo de otro */
+    height: auto !important;
+  }
+  
+  .home-hero-media {
+    height: 250px !important;
+  }
+
+  /* 6. Ajustes en Paneles de Admin */
+  /* Hace que los formularios grandes se apilen verticalmente */
+  .form-grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Botones del header móvil */
+  .mobile-nav .btn {
+    width: 100%;
+    margin-bottom: 5px;
+  }
+}
+
+/* ===================================
+   EXTRAS
+   =================================== */
+.badge {
+  background: #dc3545;
+  color: #fff;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  vertical-align: top;
+}
+
+.text-center { text-align: center; }
+.text-right { text-align: right; }
