@@ -1,39 +1,42 @@
-// src/paginas/registro.jsx
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { FaUser, FaEnvelope, FaLock, FaMapMarkerAlt, FaHome } from 'react-icons/fa';
-import { API_BASE } from '../lib/api.js'; 
+import { FaUser, FaEnvelope, FaLock, FaMapMarkerAlt, FaHome, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { API_BASE } from '../lib/api.js';
+import { useAuth } from '../context/AuthContext'; 
 
-// ... (Tu objeto REGIONES_COMUNAS_CHILE va aquí) ...
+// [Toda la lista de REGIONES_COMUNAS_CHILE va aquí, no la borres]
 const REGIONES_COMUNAS_CHILE = {
-  "Región de Arica y Parinacota": ["Arica", "Camarones", "Putre", "General Lagos"],
-  "Región de Tarapacá": ["Iquique", "Alto Hospicio", "Pozo Almonte", "Pica", "Huara", "Camiña", "Colchane"],
-  "Región de Antofagasta": ["Antofagasta", "Mejillones", "Sierra Gorda", "Taltal", "Calama", "Ollagüe", "San Pedro de Atacama", "Tocopilla", "María Elena"],
-  "Región de Atacama": ["Copiapó", "Caldera", "Tierra Amarilla", "Chañaral", "Diego de Almagro", "Vallenar", "Alto del Carmen", "Freirina", "Huasco"],
-  "Región de Coquimbo": ["La Serena", "Coquimbo", "Andacollo", "La Higuera", "Paiguano", "Vicuña", "Illapel", "Canela", "Los Vilos", "Salamanca", "Ovalle", "Combarbalá", "Monte Patria", "Punitaqui", "Río Hurtado"],
-  "Región de Valparaíso": ["Valparaíso", "Viña del Mar", "Concón", "Quilpué", "Villa Alemana", "Casablanca", "Concon", "Isla de Pascua", "Juan Fernández", "Limache", "Olmué", "Quillota", "La Cruz", "Calera", "San Felipe", "Los Andes", "San Antonio", "Cartagena", "El Quisco", "Algarrobo", "Santo Domingo"],
-  "Región Metropolitana de Santiago": ["Santiago","Cerrillos","Cerro Navia","Conchalí","El Bosque","Estación Central","Huechuraba","Independencia","La Cisterna","La Florida","La Granja","La Pintana","La Reina","Las Condes","Lo Barnechea","Lo Espejo","Lo Prado","Macul","Maipú","Ñuñoa","Pedro Aguirre Cerda","Peñalolén","Providencia","Pudahuel","Quilicura","Quinta Normal","Recoleta","Renca","San Joaquín","San Miguel","San Ramón","Vitacura","Puente Alto","San Bernardo","Padre Hurtado","Melipilla"],
-  "Región del Libertador Gral. Bernardo O’Higgins": ["Rancagua","Machalí","Graneros","Mostazal","Doñihue","Coltauco","Requínoa","San Fernando","Santa Cruz","Pichilemu","Litueche"],
-  "Región del Maule": ["Talca","Curicó","Linares","Constitución","Cauquenes","Parral","San Javier","Molina"],
-  "Región de Ñuble": ["Chillán","Chillán Viejo","San Carlos","Quillón","Yungay"],
-  "Región del Biobío": ["Concepción","Talcahuano","San Pedro de la Paz","Coronel","Lota","Hualpén","Los Ángeles","Lebu","Arauco"],
-  "Región de La Araucanía": ["Temuco","Padre Las Casas","Villarrica","Pucón","Angol","Lautaro"],
-  "Región de Los Ríos": ["Valdivia","La Unión","Panguipulli","Río Bueno","Los Lagos"],
-  "Región de Los Lagos": ["Puerto Montt","Osorno","Puerto Varas","Castro","Ancud","Chaitén"],
-  "Región de Aysén del Gral. Carlos Ibáñez del Campo": ["Coyhaique","Puerto Aysén","Chile Chico","Cochrane"],
-  "Región de Magallanes y de la Antártica Chilena": ["Punta Arenas","Puerto Natales","Porvenir","Puerto Williams"]
+  "Arica y Parinacota": ["Arica", "Camarones", "Putre", "General Lagos"],
+  "Tarapacá": ["Iquique", "Alto Hospicio", "Pozo Almonte", "Pica", "Huara", "Camiña", "Colchane"],
+  "Antofagasta": ["Antofagasta", "Mejillones", "Sierra Gorda", "Taltal", "Calama", "Ollagüe", "San Pedro de Atacama", "Tocopilla", "María Elena"],
+  "Atacama": ["Copiapó", "Caldera", "Tierra Amarilla", "Chañaral", "Diego de Almagro", "Vallenar", "Alto del Carmen", "Freirina", "Huasco"],
+  "Coquimbo": ["La Serena", "Coquimbo", "Andacollo", "La Higuera", "Paiguano", "Vicuña", "Illapel", "Canela", "Los Vilos", "Salamanca", "Ovalle", "Combarbalá", "Monte Patria", "Punitaqui", "Río Hurtado"],
+  "Valparaíso": ["Valparaíso", "Viña del Mar", "Concón", "Quilpué", "Villa Alemana", "Casablanca", "Juan Fernández", "San Antonio", "Cartagena", "El Tabo", "El Quisco", "Algarrobo", "Santo Domingo"],
+  "Metropolitana": ["Santiago", "Cerrillos", "Cerro Navia", "Conchalí", "El Bosque", "Estación Central", "Huechuraba", "Independencia", "La Cisterna", "La Florida", "La Granja", "La Pintana", "La Reina", "Las Condes", "Lo Barnechea", "Lo Espejo", "Lo Prado", "Macul", "Maipú", "Ñuñoa", "Pedro Aguirre Cerda", "Peñalolén", "Providencia", "Pudahuel", "Quilicura", "Quinta Normal", "Recoleta", "Renca", "San Joaquín", "San Miguel", "San Ramón", "Vitacura", "Puente Alto", "Pirque", "San José de Maipo", "San Bernardo", "Buin", "Calera de Tango", "Paine", "Melipilla", "Alhué", "Curacaví", "María Pinto", "San Pedro", "Talagante", "El Monte", "Isla de Maipo", "Padre Hurtado", "Peñaflor"],
+  "O'Higgins": ["Rancagua", "Machalí", "Graneros", "Mostazal", "San Fernando", "Santa Cruz", "Pichilemu"],
+  "Maule": ["Talca", "Curicó", "Linares", "Constitución", "Cauquenes", "Parral"],
+  "Ñuble": ["Chillán", "Chillán Viejo", "San Carlos", "Bulnes"],
+  "Biobío": ["Concepción", "Talcahuano", "San Pedro de la Paz", "Chiguayante", "Coronel", "Lota", "Tomé", "Penco", "Hualpén", "Los Ángeles", "Arauco", "Lebu"],
+  "La Araucanía": ["Temuco", "Padre Las Casas", "Villarrica", "Pucón", "Angol"],
+  "Los Ríos": ["Valdivia", "Corral", "Lanco", "Los Lagos", "Máfil", "Mariquina", "Paillaco", "Panguipulli", "La Unión", "Futrono", "Lago Ranco", "Río Bueno"],
+  "Los Lagos": ["Puerto Montt", "Puerto Varas", "Osorno", "Castro", "Ancud"],
+  "Aysén": ["Coyhaique", "Puerto Aysén"],
+  "Magallanes": ["Punta Arenas", "Puerto Natales"]
 };
 const REGIONES = Object.keys(REGIONES_COMUNAS_CHILE);
 
-
 export default function RegisterForm() {
   const navigate = useNavigate();
+  const { login } = useAuth(); 
+
   const [nombre, setNombre] = useState('');
   const [apellidos, setApellidos] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [calle, setCalle] = useState('');
   const [depto, setDepto] = useState('');
@@ -42,7 +45,6 @@ export default function RegisterForm() {
 
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
-  const [okMsg, setOkMsg] = useState('');
 
   const comunasDisponibles = region ? REGIONES_COMUNAS_CHILE[region] : [];
 
@@ -50,19 +52,27 @@ export default function RegisterForm() {
 
   const validateForm = () => {
     const e = {};
-    if (!nombre || nombre.length < 3) e.nombre = 'El nombre es requerido (min 3).';
-    if (!apellidos || apellidos.length < 3) e.apellidos = 'Los apellidos son requeridos (min 3).';
+    const nombreCompleto = `${nombre} ${apellidos}`.trim();
+    
+    // --- VALIDACIÓN DE REGLAS DE NEGOCIO ---
+    const dominioRegex = /@(duoc\.cl|profesor\.duoc\.cl|gmail\.com)$/i;
 
+    if (!nombreCompleto || nombreCompleto.length < 5) e.nombre = 'Nombre y apellido requeridos (mín. 5 caracteres).';
+    
     if (!email) {
-      e.email = 'El correo es requerido.';
+      e.email = 'El correo es obligatorio.';
+    } else if (email.length > 100) {
+      e.email = 'Máximo 100 caracteres.';
+    } else if (!dominioRegex.test(email)) {
+      e.email = 'Solo dominios @duoc.cl, @profesor.duoc.cl o @gmail.com.';
     }
 
-    if (!password || password.length < 4 || password.length > 10) {
+    if (!password || password.length < 4 || password.length > 10) { // Regla: 4 a 10 caracteres
       e.password = 'La contraseña debe tener entre 4 y 10 caracteres.';
     }
     if (password !== confirmPassword) e.confirmPassword = 'Las contraseñas no coinciden.';
 
-    if (!calle || calle.length < 5) e.calle = 'La calle y numeración son requeridas.';
+    if (!calle || calle.length < 5) e.calle = 'La dirección es requerida.';
     if (!region) e.region = 'La Región es requerida.';
     if (!comuna) e.comuna = 'La Comuna es requerida.';
 
@@ -73,221 +83,169 @@ export default function RegisterForm() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setServerError('');
-    setOkMsg('');
     if (!validateForm()) return;
 
+    setIsSubmitting(true);
+
     try {
-      const resp = await fetch(`${API_BASE}/auth/register`, {
+      // 1. REGISTRO
+      const payloadRegistro = {
+        nombre: `${nombre} ${apellidos}`.trim(), 
+        email: email,
+        password: password,
+        rol: "CLIENTE",
+        direccionRegion: region,
+        direccionComuna: comuna,
+        direccionCalle: calle,
+        direccionDepto: depto
+      };
+
+      const resRegistro = await fetch(`${API_BASE}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre, apellidos, email, password, calle, depto: depto || null, region, comuna }),
+        body: JSON.stringify(payloadRegistro),
       });
-      const data = await resp.json();
-      if (!resp.ok) {
-        setServerError(data?.error || 'Error al registrar el usuario.');
-        return;
+
+      if (!resRegistro.ok) {
+        const errorData = await resRegistro.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Error al registrar. El correo podría estar en uso.');
       }
-      setOkMsg('¡Registro exitoso! Redirigiendo al inicio de sesión…');
-      setTimeout(() => navigate('/'), 1200);
-    } catch {
-      setServerError('No se pudo conectar con el servidor.');
+
+      // 2. AUTO-LOGIN
+      const resLogin = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (resLogin.ok) {
+        const dataLogin = await resLogin.json();
+        login(dataLogin.usuario, dataLogin.token);
+        navigate('/');
+      } else {
+        navigate('/inicio');
+      }
+
+    } catch (err) {
+      setServerError(err.message || 'No se pudo conectar con el servidor.');
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="container" style={{ paddingTop: '3rem', paddingBottom: '3rem' }}>
-      <div className="form-shell">
-        <h2>Crear Cuenta</h2>
+    <div className="main-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '85vh', padding: '2rem 0' }}>
+      <div className="form-shell" style={{ maxWidth: '500px' }}>
+        <div style={{textAlign:'center', marginBottom:'1.5rem'}}>
+          <h2 style={{ margin: 0, color: 'var(--brand)', fontWeight: 800 }}>Crear Cuenta</h2>
+          <p style={{ color: 'var(--muted)' }}>Únete a Peluchemanía</p>
+        </div>
+
+        {serverError && <div className="server-error-message">{serverError}</div>}
 
         <form noValidate onSubmit={handleSubmit}>
-          <div className="grid form-grid-2">
+          
+          {/* Nombre y Apellido */}
+          <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div className="form-group">
-              <label className="form-label" htmlFor="nombre">Nombre</label>
-              <div className="input-icon-wrapper">
-                <input
-                  id="nombre" // <-- AÑADIDO
-                  className="form-control"
-                  type="text"
-                  placeholder="Tu nombre"
-                  value={nombre}
-                  onChange={(e) => setNombre(e.target.value)}
-                />
-                <FaUser className="input-icon" />
-              </div>
-              {errors.nombre && <div className="error-message">{errors.nombre}</div>}
+              <label className="form-label">Nombre</label>
+              <div className="input-icon-wrapper"><FaUser className="input-icon" /><input className="form-control" style={{paddingLeft:40}} placeholder="Tu nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} /></div>
+              {errors.nombre && <div className="error-message" style={{color:'#dc3545', fontWeight:600}}>{errors.nombre}</div>}
             </div>
 
             <div className="form-group">
-              <label className="form-label" htmlFor="apellidos">Apellidos</label>
-              <div className="input-icon-wrapper">
-                <input
-                  id="apellidos" // <-- AÑADIDO
-                  className="form-control"
-                  type="text"
-                  placeholder="Tus apellidos"
-                  value={apellidos}
-                  onChange={(e) => setApellidos(e.target.value)}
-                />
-                <FaUser className="input-icon" />
-              </div>
-              {errors.apellidos && <div className="error-message">{errors.apellidos}</div>}
+              <label className="form-label">Apellidos</label>
+              <div className="input-icon-wrapper"><FaUser className="input-icon" /><input className="form-control" style={{paddingLeft:40}} placeholder="Tus apellidos" value={apellidos} onChange={(e) => setApellidos(e.target.value)} /></div>
+              {errors.apellidos && <div className="error-message" style={{color:'#dc3545', fontWeight:600}}>{errors.apellidos}</div>}
             </div>
           </div>
-
+          
+          {/* Email */}
           <div className="form-group">
-            <label className="form-label" htmlFor="email">Correo</label>
-            <div className="input-icon-wrapper">
-              <input
-                id="email" // <-- AÑADIDO
-                className="form-control"
-                type="email"
-                placeholder="ejemplo@duoc.cl"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <FaEnvelope className="input-icon" />
-            </div>
-            {errors.email && <div className="error-message">{errors.email}</div>}
+            <label className="form-label">Correo Electrónico</label>
+            <div className="input-icon-wrapper"><FaEnvelope className="input-icon" /><input className="form-control" style={{paddingLeft:40}} type="email" placeholder="ejemplo@correo.com" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={100} /></div>
+            {errors.email && <div className="error-message" style={{color:'#dc3545', fontWeight:600}}>{errors.email}</div>}
           </div>
 
-          <h4 className="mb-2">Dirección de Envío</h4>
+          <h4 style={{margin:'1.5rem 0 1rem', color:'#555', borderBottom:'1px solid #eee', paddingBottom:'5px'}}>Dirección de Envío</h4>
 
-          <div className="grid form-grid-2">
+          {/* Dirección (Grid) */}
+          <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div className="form-group">
-              <label className="form-label" htmlFor="region">Región</label>
+              <label className="form-label">Región</label>
               <div className="input-icon-wrapper">
-                <select
-                  id="region" // <-- AÑADIDO
-                  className="form-control"
-                  value={region}
-                  onChange={(e) => setRegion(e.target.value)}
-                >
-                  <option value="">Selecciona una Región</option>
-                  {REGIONES.map((r) => (
-                    <option key={r} value={r}>
-                      {r}
-                    </option>
-                  ))}
-                </select>
                 <FaMapMarkerAlt className="input-icon" />
-              </div>
-              {errors.region && <div className="error-message">{errors.region}</div>}
-            </div>
-
-            <div className="form-group">
-              <label className="form-label" htmlFor="comuna">Comuna</label>
-              <div className="input-icon-wrapper">
-                <select
-                  id="comuna" // <-- AÑADIDO
-                  className="form-control"
-                  value={comuna}
-                  onChange={(e) => setComuna(e.target.value)}
-                  disabled={!region}
-                >
-                  <option value="">Selecciona una Comuna</option>
-                  {comunasDisponibles.sort().map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
+                <select className="form-control" style={{paddingLeft:40}} value={region} onChange={(e) => setRegion(e.target.value)}>
+                  <option value="">Seleccionar</option>
+                  {REGIONES.map(r => <option key={r} value={r}>{r}</option>)}
                 </select>
+              </div>
+              {errors.region && <div className="error-message" style={{color:'#dc3545', fontWeight:600}}>{errors.region}</div>}
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Comuna</label>
+              <div className="input-icon-wrapper">
                 <FaMapMarkerAlt className="input-icon" />
+                <select className="form-control" style={{paddingLeft:40}} value={comuna} onChange={(e) => setComuna(e.target.value)} disabled={!region}>
+                  <option value="">Seleccionar</option>
+                  {comunasDisponibles.sort().map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
               </div>
-              {errors.comuna && <div className="error-message">{errors.comuna}</div>}
+              {errors.comuna && <div className="error-message" style={{color:'#dc3545', fontWeight:600}}>{errors.comuna}</div>}
             </div>
           </div>
 
           <div className="form-group">
-            <label className="form-label" htmlFor="calle">Calle y Numeración</label>
+            <label className="form-label">Calle y Número</label>
             <div className="input-icon-wrapper">
-              <input
-                id="calle" // <-- AÑADIDO
-                className="form-control"
-                type="text"
-                placeholder="Ej: Av. Vicuña Mackenna 4860"
-                value={calle}
-                onChange={(e) => setCalle(e.target.value)}
-              />
               <FaHome className="input-icon" />
+              <input className="form-control" style={{paddingLeft:40}} placeholder="Ej: Av. Siempre Viva 123" value={calle} onChange={(e) => setCalle(e.target.value)} />
             </div>
-            {errors.calle && <div className="error-message">{errors.calle}</div>}
+            {errors.calle && <div className="error-message" style={{color:'#dc3545', fontWeight:600}}>{errors.calle}</div>}
           </div>
 
           <div className="form-group">
-            <label className="form-label" htmlFor="depto">Departamento / Casa (Opcional)</label>
+            <label className="form-label">Depto / Casa (Opcional)</label>
             <div className="input-icon-wrapper">
-              <input
-                id="depto" // <-- AÑADIDO
-                className="form-control"
-                type="text"
-                placeholder="Ej: Depto 501"
-                value={depto}
-                onChange={(e) => setDepto(e.target.value)}
-              />
               <FaHome className="input-icon" />
+              <input className="form-control" style={{paddingLeft:40}} placeholder="Ej: 402B" value={depto} onChange={(e) => setDepto(e.target.value)} />
             </div>
           </div>
 
-          <div className="grid form-grid-2">
+          <h4 style={{margin:'1.5rem 0 1rem', color:'#555', borderBottom:'1px solid #eee', paddingBottom:'5px'}}>Seguridad</h4>
+
+          {/* Contraseñas (Grid) */}
+          <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div className="form-group">
-              <label className="form-label" htmlFor="password">Contraseña</label>
-              <div className="input-icon-wrapper">
-                <input
-                  id="password" // <-- AÑADIDO
-                  className="form-control"
-                  type="password"
-                  placeholder="Crea tu contraseña"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+              <label className="form-label">Contraseña</label>
+              <div className="input-icon-wrapper" style={{position:'relative'}}>
                 <FaLock className="input-icon" />
+                <input className="form-control" style={{paddingLeft:40, paddingRight:40}} type={showPassword ? "text" : "password"} placeholder="4 a 10 caracteres" value={password} onChange={(e) => setPassword(e.target.value)} maxLength={10} />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} style={{position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', border:'none', background:'none', color:'var(--brand)', cursor:'pointer'}}>
+                  {showPassword ? <FaEyeSlash/> : <FaEye/>}
+                </button>
               </div>
-              {errors.password && <div className="error-message">{errors.password}</div>}
+              {errors.password && <div className="error-message" style={{color:'#dc3545', fontWeight:600}}>{errors.password}</div>}
             </div>
 
             <div className="form-group">
-              <label className="form-label" htmlFor="confirmPassword">Confirmar Contraseña</label>
+              <label className="form-label">Confirmar</label>
               <div className="input-icon-wrapper">
-                <input
-                  id="confirmPassword" // <-- AÑADIDO
-                  className="form-control"
-                  type="password"
-                  placeholder="Repite la contraseña"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
                 <FaLock className="input-icon" />
+                <input className="form-control" style={{paddingLeft:40}} type="password" placeholder="Repite la contraseña" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} maxLength={10} />
               </div>
-              {errors.confirmPassword && <div className="error-message">{errors.confirmPassword}</div>}
+              {errors.confirmPassword && <div className="error-message" style={{color:'#dc3545', fontWeight:600}}>{errors.confirmPassword}</div>}
             </div>
           </div>
 
-          <button className="btn btn-primary btn-block" type="submit">
-            Registrarme
+          <button className="btn btn-primary btn-block" type="submit" disabled={isSubmitting} style={{marginTop:'1rem', padding:'12px', fontSize:'1.1rem'}}>
+            {isSubmitting ? 'Registrando...' : 'Registrarme'}
           </button>
 
-          <Link to="/inicio" className="text-center" style={{ display: 'block', marginTop: 16 }}>
-            ¿Ya tienes cuenta? Inicia Sesión
+          <Link to="/inicio" className="text-center" style={{ display: 'block', marginTop: 16, textDecoration:'none', color:'var(--muted)' }}>
+            ¿Ya tienes cuenta? <span style={{color:'var(--brand)', fontWeight:'bold'}}>Inicia Sesión</span>
           </Link>
 
-          {serverError && (
-            <div className="server-error-message" style={{ marginTop: 12 }}>
-              {serverError}
-            </div>
-          )}
-          {okMsg && (
-            <div
-              style={{
-                background: 'rgba(25,135,84,.08)',
-                color: '#198754',
-                padding: '.6rem .8rem',
-                borderRadius: 8,
-                marginTop: 12
-              }}
-            >
-              {okMsg}
-            </div>
-          )}
         </form>
       </div>
     </div>
