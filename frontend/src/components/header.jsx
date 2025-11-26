@@ -13,7 +13,6 @@ function Header() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  // Verificamos rol (ajustado a Spring Boot)
   const isAdmin = user?.rol === 'ADMIN' || user?.rol === 'ROLE_ADMIN';
 
   const handleLinkClick = () => setMenuOpen(false);
@@ -36,7 +35,7 @@ function Header() {
 
   return (
     <>
-      <div style={{ height: '80px' }}></div>
+      {/* 🛑 AQUÍ ESTABA EL DIV ESPACIADOR QUE DEBES ELIMINAR 🛑 */}
 
       <header className="header-fixed" style={{ 
         height: '80px', 
@@ -82,46 +81,29 @@ function Header() {
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 
-                {/* Nombre Usuario */}
+                {/* Saludo */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--brand)', fontWeight: '700', marginRight: '5px' }}>
-                  <BsPersonCircle size={18} />
-                  <span>{user.nombre || 'Usuario'}</span>
+                  <BsPersonCircle /> 
+                  <span>Hola, {user.nombre || 'Usuario'}</span>
                 </div>
 
-                {/* BOTÓN ADMIN MEJORADO */}
+                {/* BOTÓN ADMIN */}
                 {isAdmin && (
                   <Link to="/admin" style={{
-                    textDecoration: 'none',
-                    background: '#fff3f3', // Fondo suave color marca
-                    color: 'var(--brand)',
-                    border: '1px solid var(--brand)',
-                    padding: '6px 12px',
-                    borderRadius: '20px',
-                    fontSize: '0.85rem',
-                    fontWeight: '700',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    transition: 'all 0.2s'
-                  }}>
+                    textDecoration: 'none', background: '#fff3f3', color: 'var(--brand)',
+                    border: '1px solid var(--brand)', padding: '6px 12px', borderRadius: '20px',
+                    fontSize: '0.85rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s'
+                  }} title="Panel Admin">
                     <BsGearFill size={14} /> Admin
                   </Link>
                 )}
 
-                {/* Botón Salir con Texto */}
+                {/* Botón Salir */}
                 <button onClick={handleLogout} style={{
-                  border: '1px solid #dc3545',
-                  background: 'transparent',
-                  color: '#dc3545',
-                  padding: '6px 12px',
-                  borderRadius: '20px',
-                  fontSize: '0.85rem',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}>
+                  border: '1px solid #dc3545', background: 'transparent', color: '#dc3545', padding: '6px 12px', 
+                  borderRadius: '20px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: '6px'
+                }} title="Salir">
                   Salir <BsBoxArrowRight size={16} />
                 </button>
               </div>
@@ -133,10 +115,8 @@ function Header() {
             <BsCart4 />
             {totalItems > 0 && (
               <span style={{
-                position: 'absolute', top: '-8px', right: '-10px',
-                background: '#d63031', color: 'white',
-                borderRadius: '50%', width: '20px', height: '20px',
-                fontSize: '0.75rem', fontWeight: 'bold',
+                position: 'absolute', top: '-8px', right: '-10px', background: '#d63031', color: 'white',
+                borderRadius: '50%', width: '20px', height: '20px', fontSize: '0.75rem', fontWeight: 'bold',
                 display: 'flex', alignItems: 'center', justifyContent: 'center'
               }}>
                 {totalItems}
@@ -153,12 +133,7 @@ function Header() {
 
       {/* Menú Móvil */}
       {menuOpen && (
-        <div className="mobile-nav" style={{
-          position: 'fixed', top: '80px', left: 0, right: 0,
-          background: 'white', padding: '20px',
-          boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
-          display: 'flex', flexDirection: 'column', gap: '15px', zIndex: 999
-        }}>
+        <div className="mobile-nav" style={{ position: 'fixed', top: '80px', left: 0, right: 0, background: 'white', padding: '20px', boxShadow: '0 10px 20px rgba(0,0,0,0.1)', display: 'flex', flexDirection: 'column', gap: '15px', zIndex: 999 }}>
           <Link to="/" onClick={handleLinkClick} style={linkStyle}>Inicio</Link>
           <Link to="/productos" onClick={handleLinkClick} style={linkStyle}>Productos</Link>
           <Link to="/categorias" onClick={handleLinkClick} style={linkStyle}>Categorías</Link>
@@ -171,7 +146,7 @@ function Header() {
               <div style={{ fontWeight: 'bold', color: 'var(--brand)' }}>Hola, {user.email}</div>
               {isAdmin && (
                 <Link to="/admin" onClick={handleLinkClick} style={{...linkStyle, color: 'var(--brand)'}}>
-                  <BsGearFill style={{marginRight:'8px'}}/> Ir al Panel de Admin
+                  <BsGearFill style={{marginRight:'8px'}}/> Panel de Admin
                 </Link>
               )}
               <button onClick={handleLogout} style={{ ...linkStyle, color: '#dc3545', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
