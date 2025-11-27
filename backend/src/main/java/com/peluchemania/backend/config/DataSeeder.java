@@ -34,7 +34,7 @@ public class DataSeeder {
                     "Metropolitana", "Santiago Centro", "Av. Siempreviva 742", "Oficina 1");
             
             // Vendedor
-            crearUsuario(usuarioRepo, passwordEncoder, "Vendedor Estrella", "vendedor@duoc.cl", "vendedor123", "VENDEDOR", null, null, null, null);
+            crearUsuario(usuarioRepo, passwordEncoder, "Vendedor Estrella", "vendedor@duoc.cl", "vend123", "VENDEDOR", null, null, null, null);
             
             // Cliente (Corregido el .cl a .com)
             crearUsuario(usuarioRepo, passwordEncoder, "Cliente Feliz", "cliente@gmail.com", "cliente23", "CLIENTE", null, null, null, null);
