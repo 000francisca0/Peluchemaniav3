@@ -3,7 +3,7 @@ package com.peluchemania.backend.controller;
 import com.peluchemania.backend.entity.Producto;
 import com.peluchemania.backend.repository.ProductoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException; 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -62,9 +62,9 @@ public class ProductoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // 5. ELIMINAR (DELETE) 
+    // 5. ELIMINAR (DELETE) - MEJORADO CON MANEJO DE ERRORES
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> eliminar(@PathVariable Long id) {
+    public ResponseEntity<?> eliminar(@PathVariable Long id) { // <--- CAMBIO A <?> PARA EVITAR ERROR DE COMPILACIÓN
         return productoRepository.findById(id)
                 .map(prod -> {
                     try {
