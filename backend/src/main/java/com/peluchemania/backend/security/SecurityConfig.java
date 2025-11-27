@@ -2,7 +2,7 @@ package com.peluchemania.backend.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod; // <--- IMPORTANTE
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,7 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration; // <--- IMPORTANTE
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
@@ -31,18 +31,28 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource())) // <--- 1. ACTIVAR CORS AQUÍ
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                // 2. Permitir PREFLIGHT (OPTIONS) explícitamente
+                // Permitir PREFLIGHT (OPTIONS) para que el navegador no bloquee las peticiones
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 
                 // Rutas Públicas
-                .requestMatchers("/api/auth/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/error").permitAll()
+                .requestMatchers(
+                    "/api/auth/**", 
+                    "/v3/api-docs/**", 
+                    "/swagger-ui/**", 
+                    "/swagger-ui.html", 
+                    "/error"
+                ).permitAll()
+                
+                // Rutas de Lectura Públicas (Productos y Categorías)
                 .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/categorias/**").permitAll()
                 
-                // Todo lo demás requiere login
+                // Todo lo demás requiere estar logueado (Token válido)
+                // NOTA: Para endpoints de admin como /api/users, /api/boletas, etc.
+                // el filtro JWT validará el rol automáticamente o puedes restringir más aquí.
                 .anyRequest().authenticated()
             )
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -51,11 +61,15 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // 3. CONFIGURACIÓN MAESTRA DE CORS (Reemplaza lo que teníamos en WebConfig)
+    // --- CONFIGURACIÓN DE CORS GLOBAL (MODIFICADA PARA AWS) ---
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // Tu Frontend
+        
+        // CAMBIO: Usamos 'AllowedOriginPatterns' con comodín (*) 
+        // Esto permite que tu Frontend en AWS (IP pública) se conecte sin bloqueo.
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+        
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
