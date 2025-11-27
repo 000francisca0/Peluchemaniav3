@@ -3,6 +3,7 @@ package com.peluchemania.backend.controller;
 import com.peluchemania.backend.entity.Producto;
 import com.peluchemania.backend.repository.ProductoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException; 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,7 +36,7 @@ public class ProductoController {
         return productoRepository.save(producto);
     }
 
-    // 4. ACTUALIZAR (PUT) - Solo Admin (¡CORREGIDO PARA OFERTAS!)
+    // 4. ACTUALIZAR (PUT) - Solo Admin
     @PutMapping("/{id}")
     public ResponseEntity<Producto> actualizar(@PathVariable Long id, @RequestBody Producto detalles) {
         return productoRepository.findById(id)
@@ -47,11 +48,11 @@ public class ProductoController {
                     prod.setStock(detalles.getStock());
                     prod.setUrlImagen(detalles.getUrlImagen());
                     
-                    // Actualizar datos de OFERTA (Esto faltaba antes)
+                    // Actualizar datos de OFERTA
                     prod.setOnSale(detalles.getOnSale());
                     prod.setDiscountPercentage(detalles.getDiscountPercentage());
 
-                    // Actualizar CATEGORÍA (Solo si viene una nueva)
+                    // Actualizar CATEGORÍA
                     if(detalles.getCategoria() != null && detalles.getCategoria().getId() != null) {
                         prod.setCategoria(detalles.getCategoria());
                     }
@@ -61,13 +62,18 @@ public class ProductoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // 5. ELIMINAR (DELETE) - Solo Admin
+    // 5. ELIMINAR (DELETE) 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> eliminar(@PathVariable Long id) {
         return productoRepository.findById(id)
                 .map(prod -> {
-                    productoRepository.delete(prod);
-                    return ResponseEntity.noContent().build();
+                    try {
+                        productoRepository.delete(prod);
+                        return ResponseEntity.noContent().build();
+                    } catch (DataIntegrityViolationException e) {
+                        // Esto ocurre si intentas borrar un producto que ya está en una boleta
+                        return ResponseEntity.status(409).body("No se puede eliminar: El producto tiene ventas asociadas.");
+                    }
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -81,7 +87,6 @@ public class ProductoController {
     // 7. BUSCAR STOCK CRÍTICO (GET /low-stock)
     @GetMapping("/low-stock")
     public List<Producto> listarStockCritico() {
-        // Devuelve productos con menos de 5 unidades
         return productoRepository.findByStockLessThan(5);
     }
 }
